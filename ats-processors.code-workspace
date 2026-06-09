@@ -1,0 +1,13 @@
+{
+  "folders": [
+	{
+		"name": "ats-processors",
+		"path": "."
+	},
+	{
+		"name": "月次集計_引き継ぎ",
+		"path": "../../../media-all/月次集計_引き継ぎ"
+	}
+],
+  "settings": {}
+}

@@ -1,0 +1,20 @@
+# ATS Processors - 必須パッケージ
+
+# スクレイピング関連
+selenium>=4.0.0
+webdriver-manager>=3.8.0
+playwright>=1.40.0
+beautifulsoup4>=4.12.0
+
+# データ処理
+pandas>=2.0.0
+
+# 設定ファイル
+pyyaml>=6.0
+
+# HTTP通信
+requests>=2.31.0
+
+# オプション（開発用）
+ipython>=8.0.0
+jupyter>=1.0.0
