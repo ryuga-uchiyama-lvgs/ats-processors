@@ -41,8 +41,12 @@ if errorlevel 1 goto fail
 if errorlevel 1 goto fail
 
 echo [3/4] 自動操作用のブラウザをインストールしています...
+rem 社内ネットワーク(プロキシ/自己署名証明書)でダウンロードが弾かれる対策
+set NODE_TLS_REJECT_UNAUTHORIZED=0
+set PLAYWRIGHT_DOWNLOAD_HOST=
 "プログラム本体\venv\Scripts\python.exe" -m playwright install chromium
 if errorlevel 1 goto fail
+set NODE_TLS_REJECT_UNAUTHORIZED=
 
 echo [4/4] 保存先フォルダを設定しています...
 rem Macで作った「ショートカット」はWindowsでは動かないため、ここで作り直す

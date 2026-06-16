@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>求人データ取得ツール 操作マニュアル</title>
+<style>
+  :root{
+    --bg:#f4f5f7; --card:#ffffff; --ink:#22262e; --muted:#5d6573;
+    --line:#e4e7ec; --brand:#345086; --brand-d:#2a3f6b; --brand-l:#eef1f7;
+    --accent:#3d6098;
+    --ok:#2f7d5b; --ok-l:#eef6f1; --warn:#9a6a16; --warn-l:#faf3e6;
+    --imp:#a8403a; --imp-l:#f8ecea; --note:#3d6098; --note-l:#eef1f7;
+    --radius:10px; --shadow:0 1px 2px rgba(20,30,60,.05),0 8px 28px rgba(20,30,60,.05);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic Medium","Yu Gothic",Meiryo,sans-serif;
+    line-height:1.9; font-size:15.5px; -webkit-font-smoothing:antialiased; letter-spacing:.01em;
+  }
+  a{color:var(--brand-d)}
+  .wrap{display:flex; max-width:1160px; margin:0 auto; gap:36px; padding:0 24px}
+  .side{width:236px; flex:0 0 236px; position:sticky; top:0; align-self:flex-start; height:100vh; overflow:auto; padding:30px 4px 40px}
+  .side .brand{font-weight:700; font-size:13px; letter-spacing:.04em; margin:0 12px 16px; color:var(--muted); border-bottom:1px solid var(--line); padding-bottom:14px}
+  .toc a{display:block; text-decoration:none; color:var(--muted); font-size:13.5px; padding:7px 12px; border-radius:7px; border-left:2px solid transparent}
+  .toc a:hover{background:var(--brand-l); color:var(--brand-d)}
+  .toc a.active{background:var(--brand-l); color:var(--brand-d); border-left-color:var(--brand); font-weight:700}
+  .toc .sub{font-size:12.5px; padding-left:26px; color:#8b93a1}
+  .main{flex:1 1 auto; min-width:0; padding:0 0 90px}
+  .hero{background:linear-gradient(140deg,#2f4673,#3d6098); color:#fff; border-radius:0 0 18px 18px; padding:52px 44px 44px; margin-bottom:30px; box-shadow:var(--shadow)}
+  .hero h1{margin:0 0 14px; font-size:27px; line-height:1.45; font-weight:700; letter-spacing:.02em}
+  .hero p{margin:0; opacity:.92; font-size:15px; max-width:60ch}
+  section{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); padding:34px 40px; margin:0 0 22px; box-shadow:var(--shadow); scroll-margin-top:16px}
+  section>h2{margin:0 0 8px; font-size:21px; font-weight:700; display:flex; align-items:center; gap:14px; letter-spacing:.02em}
+  section>h2 .no{width:30px;height:30px;flex:0 0 30px;border-radius:8px;background:var(--brand);color:#fff;display:grid;place-items:center;font-size:14px;font-weight:700}
+  .lead{color:var(--muted); margin:0 0 24px; font-size:15px}
+  h3{font-size:17px; font-weight:700; margin:30px 0 10px; padding-bottom:8px; border-bottom:1px solid var(--line)}
+  h3 .tag{font-size:11.5px;font-weight:700;color:#fff;background:var(--accent);padding:3px 10px;border-radius:5px;margin-right:10px;vertical-align:2px;letter-spacing:.03em}
+  p{margin:10px 0}
+  .steps{counter-reset:s; margin:18px 0; padding:0; list-style:none}
+  .steps>li{position:relative; padding:14px 18px 14px 56px; margin:0 0 10px; background:#fbfcfd; border:1px solid var(--line); border-radius:9px}
+  .steps>li::before{counter-increment:s; content:counter(s); position:absolute; left:16px; top:14px; width:26px; height:26px; background:var(--card); border:1.5px solid var(--brand); color:var(--brand-d); border-radius:50%; display:grid; place-items:center; font-weight:700; font-size:13px}
+  .steps .note{font-size:13px; color:var(--muted); margin-top:5px; line-height:1.75}
+  .box{border-radius:8px; padding:13px 18px; margin:18px 0; font-size:14.5px; border:1px solid; border-left-width:3px}
+  .box .t{font-weight:700; font-size:12px; letter-spacing:.06em; margin-bottom:3px; text-transform:none}
+  .box p{margin:4px 0}
+  .note-b{background:var(--note-l); border-color:#cdd8ea; border-left-color:var(--note)}  .note-b .t{color:var(--note)}
+  .tip-b{background:var(--ok-l); border-color:#cce4d8; border-left-color:var(--ok)}        .tip-b .t{color:var(--ok)}
+  .warn-b{background:var(--warn-l); border-color:#ecdcb8; border-left-color:var(--warn)}    .warn-b .t{color:var(--warn)}
+  .imp-b{background:var(--imp-l); border-color:#eccac7; border-left-color:var(--imp)}        .imp-b .t{color:var(--imp)}
+  table{width:100%; border-collapse:collapse; margin:16px 0; font-size:14px}
+  th,td{border:1px solid var(--line); padding:10px 14px; text-align:left; vertical-align:top}
+  th{background:#f0f3f8; font-weight:700; color:#333a47}
+  tbody tr:nth-child(even){background:#fafbfd}
+  td code,p code,li code{background:#eef1f6; padding:2px 6px; border-radius:5px; font-size:12.5px; font-family:"SFMono-Regular",Consolas,Menlo,monospace}
+  pre{background:#222836; color:#e6eaf2; padding:16px 18px; border-radius:9px; overflow:auto; font-size:13px; line-height:1.7; margin:14px 0}
+  pre code{font-family:"SFMono-Regular",Consolas,Menlo,monospace}
+  .tabs{display:flex; gap:6px; margin:10px 0 0}
+  .tab-btn{border:1px solid var(--line); background:#f7f8fa; padding:9px 22px; border-radius:8px 8px 0 0; cursor:pointer; font-size:14.5px; font-weight:700; color:var(--muted); font-family:inherit}
+  .tab-btn.active{color:var(--brand-d); background:#fff; border-color:var(--line); border-bottom-color:#fff; position:relative; top:1px}
+  .tab-panel{display:none; border:1px solid var(--line); border-radius:0 9px 9px 9px; padding:22px 24px; background:#fff}
+  .tab-panel.active{display:block}
+  .when{display:inline-block; background:#eef1f7; color:var(--brand-d); font-weight:700; font-size:12.5px; padding:3px 12px; border-radius:5px}
+  details{background:#fbfcfd; border:1px solid var(--line); border-radius:9px; padding:2px 20px; margin:16px 0}
+  details summary{cursor:pointer; font-weight:700; padding:13px 0; color:var(--brand-d); font-size:14.5px}
+  details[open] summary{border-bottom:1px solid var(--line); margin-bottom:12px}
+  .kbd{background:#fff; border:1px solid #c4cad4; border-bottom-width:2px; border-radius:5px; padding:1px 7px; font-size:12.5px; font-family:monospace}
+  .totop{position:fixed; right:24px; bottom:24px; background:var(--brand); color:#fff; width:42px;height:42px;border-radius:8px; display:grid;place-items:center; text-decoration:none; box-shadow:var(--shadow); opacity:0; pointer-events:none; transition:.2s; font-size:18px}
+  .totop.show{opacity:1; pointer-events:auto}
+  .foot{color:#9099a6; font-size:12.5px; text-align:center; padding:14px 0 0; border-top:1px solid var(--line); margin-top:18px}
+  @media (max-width:900px){
+    .side{display:none}
+    .hero{border-radius:0 0 14px 14px; padding:38px 22px 30px} .hero h1{font-size:22px}
+    section{padding:26px 22px} .wrap{padding:0 14px}
+  }
+  @media print{
+    .side,.totop{display:none} .wrap{display:block} section{box-shadow:none; break-inside:avoid; border:none; border-bottom:1px solid var(--line)}
+    .hero{background:#2f4673 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav class="side">
+    <div class="brand">操作マニュアル</div>
+    <div class="toc">
+      <a href="#intro">概要</a>
+      <a href="#overview">1. 作業の全体像</a>
+      <a href="#setup">2. 初期設定（初回のみ）</a>
+      <a href="#daily">3. 日次の取得作業</a>
+      <a class="sub" href="#daily-run">実行手順</a>
+      <a class="sub" href="#daily-drive">Drive への格納</a>
+      <a href="#monthly">4. 月次の集計作業</a>
+      <a class="sub" href="#m-step1">手順1 データ取得</a>
+      <a class="sub" href="#m-step2">手順2 dodaチャレンジ</a>
+      <a class="sub" href="#m-step3">手順3 集計・納品</a>
+      <a href="#trouble">5. トラブル対応</a>
+      <a href="#faq">6. よくあるご質問</a>
+      <a href="#glossary">7. 用語の説明</a>
+      <a href="#contact">8. お問い合わせ</a>
+    </div>
+  </nav>
+
+  <div class="main">
+    <header class="hero">
+      <h1>求人データ取得ツール 操作マニュアル</h1>
+      <p>本ツールの初期設定から、日次・月次の運用、トラブル対応までを記載しています。基本的な操作はファイルのダブルクリックのみで完結します。初めてご利用になる場合は、上から順にご確認ください。</p>
+    </header>
+
+    <section id="intro">
+      <h2><span class="no">i</span>概要</h2>
+      <p class="lead">本ツールは、複数の求人サイトから求人データを取得し、Google Drive へ格納するためのものです。作業は「日次の取得」と「月次の集計」の2種類で、いずれもファイルをダブルクリックして処理の完了を待つ流れが中心です。</p>
+      <div class="box note-b">
+        <div class="t">ご利用にあたって</div>
+        <p>作業は <b>「日次の取得（平日）」</b> と <b>「月次の集計（月1回）」</b> の2種類です。いずれも <b>初回のみ「初期設定」</b> が必要で、2回目以降は不要です。処理が途中で停止した場合は、同じファイルをもう一度実行すると解消することが多くあります。</p>
+      </div>
+      <div class="box imp-b">
+        <div class="t">重要</div>
+        <p>「プログラム本体」フォルダ内のファイルは、編集・移動・削除をしないでください。操作の対象は、本マニュアルに記載されているファイルに限られます。</p>
+      </div>
+    </section>
+
+    <section id="overview">
+      <h2><span class="no">1</span>作業の全体像</h2>
+      <p class="lead">最上位の「ats-processors」フォルダに、作業用フォルダが2つあります。実施する作業に応じて、該当するフォルダを開いて進めてください。</p>
+      <table>
+        <thead><tr><th style="width:170px">フォルダ</th><th style="width:120px">実施時期</th><th>内容</th></tr></thead>
+        <tbody>
+          <tr>
+            <td><b>毎日の取得</b></td>
+            <td><span class="when">平日に毎日</span></td>
+            <td>HRMOS・Talentio・JobCan・リクナビ・HERP の求人データを取得します。取得対象の媒体は曜日に応じて自動的に切り替わります。</td>
+          </tr>
+          <tr>
+            <td><b>月次集計-WL</b></td>
+            <td><span class="when">月末に1回</span></td>
+            <td>障害者雇用の求人媒体5つ（atGP・LITALICO仕事ナビ・dodaチャレンジ・BABナビ・マイナビパートナーズ）を取得し、企業の重複を整理した納品用データを作成します。</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="setup">
+      <h2><span class="no">2</span>初期設定（初回のみ）</h2>
+      <p class="lead">フォルダを受領後、作業を始める前に一度だけ初期設定を行います。「毎日の取得」「月次集計-WL」それぞれのフォルダで1回ずつ必要です。ご利用環境のタブを選択してください。</p>
+
+      <div class="tabs" role="tablist">
+        <button class="tab-btn active" data-tab="mac">macOS</button>
+        <button class="tab-btn" data-tab="win">Windows</button>
+      </div>
+
+      <div class="tab-panel active" id="mac">
+        <ol class="steps">
+          <li><b>作業対象のフォルダを開きます。</b><div class="note">「ats-processors」内の「毎日の取得」または「月次集計-WL」。</div></li>
+          <li><b>「はじめにこれ.command」をダブルクリックします。</b><div class="note">ターミナル（黒い画面）が開き、設定が自動的に進みます。</div></li>
+          <li><b>確認画面が表示された場合は対応します。</b>
+            <div class="note">「開発元を確認できません」と表示された場合は、ファイルを右クリックして「開く」→「開く」を選択します。「インストールしますか」と表示された場合は「インストール」を選択し、完了後に再度ダブルクリックしてください。</div></li>
+          <li><b>「準備完了」と表示されれば設定は終了です。</b><div class="note">所要時間は5〜10分程度です。完了するまで画面を閉じないでください。</div></li>
+        </ol>
+        <div class="box note-b">
+          <div class="t">補足</div>
+          <p>「毎日の取得」ではデータ取得に Google Chrome を使用します。未導入の場合は <a href="https://www.google.com/chrome/" target="_blank" rel="noopener">google.com/chrome</a> から導入してください。</p>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="win">
+        <div class="box warn-b">
+          <div class="t">注意：Windows では実行ファイルが異なります</div>
+          <p>末尾が「.command」のファイルは macOS 用です。Windows では、同名で「.command」が付かないファイル（種類が「Windowsバッチファイル」のもの）を実行してください。</p>
+        </div>
+        <ol class="steps">
+          <li><b>ZIP で受領した場合は、展開前にブロックを解除します。</b>
+            <div class="note">ZIP を右クリックして「プロパティ」を開き、下部に「許可する」のチェック欄があれば有効にして「OK」を押します。その後、右クリックから「すべて展開」を選択します（チェック欄が無い場合はそのまま展開して差し支えありません）。</div></li>
+          <li><b>作業フォルダ内の「はじめにこれ」（Windowsバッチファイル）を実行します。</b>
+            <div class="note">実行に必要な Python も自動的に導入されます。</div></li>
+          <li><b>「準備完了」と表示されれば設定は終了です。</b></li>
+        </ol>
+        <details>
+          <summary>セキュリティの確認画面が表示され、実行できない場合</summary>
+          <p><b>「WindowsによってPCが保護されました」（青い画面）</b>：「詳細情報」を押し、表示される「実行」ボタンを押します。</p>
+          <p><b>「セキュリティの警告」ダイアログ</b>：「実行」を押します。毎回表示される場合は、ファイルを右クリックして「プロパティ」→「許可する」を有効化してください。</p>
+          <p><b>ダブルクリックしても反応がない／一瞬で閉じる</b>：フォルダ上部のアドレスバーに <code>cmd</code> と入力して Enter を押し、開いた画面に対象ファイルをドラッグ＆ドロップして Enter を押します。</p>
+          <p><b>いずれでも解決しない場合</b>：表示画面のスクリーンショットを添えてお問い合わせください。社内 IT 担当による解除が必要な場合があります。</p>
+        </details>
+        <details>
+          <summary>Python の自動導入に失敗した場合（該当時のみ）</summary>
+          <p>通常は不要です。「自動インストールができませんでした」と表示された場合のみ、以下を実施してください。</p>
+          <ol class="steps">
+            <li><a href="https://www.python.org/downloads/" target="_blank" rel="noopener">python.org/downloads</a> を開きます。</li>
+            <li>「Download Python 3.◯◯」からインストーラーを取得します。</li>
+            <li>最初の画面で「Add python.exe to PATH」を必ず有効にします。</li>
+            <li>「Install Now」を押し、完了後に「Close」で閉じます。</li>
+          </ol>
+        </details>
+      </div>
+
+      <div class="box tip-b">
+        <div class="t">ポイント</div>
+        <p>初期設定は初回のみです。翌日以降・翌月以降に再度行う必要はありません。</p>
+      </div>
+    </section>
+
+    <section id="daily">
+      <h2><span class="no">3</span>日次の取得作業（平日）</h2>
+      <p class="lead">平日に1回、データを取得して Google Drive へ格納します。取得対象の媒体は曜日に応じて自動的に切り替わるため、曜日を意識して操作を変える必要はありません。</p>
+
+      <h3>曜日ごとの取得対象（自動判定）</h3>
+      <table>
+        <thead><tr><th style="width:130px">曜日</th><th>取得対象の媒体</th><th style="width:150px">所要時間の目安</th></tr></thead>
+        <tbody>
+          <tr><td>月曜</td><td>HRMOS ／ リクナビ ／ HERP</td><td>1時間以上</td></tr>
+          <tr><td>火曜・木曜</td><td>HRMOS ／ Talentio</td><td>数十分</td></tr>
+          <tr><td>水曜・金曜</td><td>HRMOS ／ JobCan</td><td>数十分</td></tr>
+          <tr><td>土曜・日曜</td><td>対象なし（実行しても処理は行われません）</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="daily-run"><span class="tag">実行手順</span></h3>
+      <ol class="steps">
+        <li><b>「実行する.command」をダブルクリックします。</b><div class="note">Windows では「実行する」（Windowsバッチファイル）を実行します。曜日は自動的に判定されます。</div></li>
+        <li><b>処理の完了を待ちます。</b>
+          <div class="note">処理中に自動的にブラウザが開きますが、操作や終了の操作は行わないでください。ターミナル（黒い画面）もそのままお待ちください。</div></li>
+        <li><b>完了すると、当日作成されたファイルの一覧が画面に表示されます。</b></li>
+        <li><b>表示されたファイルを Google Drive へ格納します。</b><div class="note">手順は次の「Drive への格納」を参照してください。</div></li>
+      </ol>
+      <div class="box warn-b">
+        <div class="t">注意</div>
+        <p>処理中に自動的に開くブラウザは、正常な動作です。クリックや終了の操作を行うと処理が中断します。月曜は時間を要しますので、画面を閉じずにお待ちください。</p>
+      </div>
+
+      <h3 id="daily-drive"><span class="tag">Drive への格納</span></h3>
+      <p>作成したファイルは、以下の Google Drive フォルダへ格納します（ブックマークを推奨します）。</p>
+      <p><a href="https://drive.google.com/drive/u/0/folders/1g2J2TNnGJLqwR1jMyIHwn1OB4l1HroUU" target="_blank" rel="noopener">納品先 Drive フォルダを開く</a></p>
+      <p>Drive 内にはカテゴリごとのフォルダがあります。ファイル名に含まれるカテゴリと同じ名称のフォルダへ格納してください。</p>
+      <table>
+        <thead><tr><th style="width:240px">ファイル名に含まれる表記</th><th style="width:200px">格納先フォルダ</th><th>ファイル名の例</th></tr></thead>
+        <tbody>
+          <tr><td>WEB</td><td>WEB</td><td><code>hrmos_WEB_item_list_2026-06-04.csv</code></td></tr>
+          <tr><td>IN_DS</td><td>IN（Drive 側の名称は「IN」）</td><td><code>hrmos_IN_DS_item_list_….csv</code></td></tr>
+          <tr><td>CRS</td><td>CRS</td><td><code>talentio_CRS_item_list_….csv</code></td></tr>
+          <tr><td>CRG</td><td>CRG</td><td><code>hrmos_CRG_item_list_….csv</code></td></tr>
+          <tr><td>コンサル</td><td>コンサル</td><td><code>rikunabi_コンサル_item_list_….csv</code></td></tr>
+        </tbody>
+      </table>
+      <div class="box note-b">
+        <div class="t">補足</div>
+        <p>ファイルの保存場所は、「毎日の取得」フォルダ内の「output」です（HERP は「output」内の「herp」）。当日の日付が含まれるファイルが対象です。</p>
+      </div>
+      <p>実行した媒体のファイルをすべて格納すると、当日の作業は完了です。</p>
+    </section>
+
+    <section id="monthly">
+      <h2><span class="no">4</span>月次の集計作業（月1回）</h2>
+      <p class="lead">月1回、障害者雇用の求人媒体5つからデータを取得し、納品用データを作成します。手順は3段階で、dodaチャレンジのみ手作業が含まれます。</p>
+      <div class="box note-b">
+        <div class="t">全体の流れ</div>
+        <p>手順1：データ取得（自動）　→　手順2：dodaチャレンジの取得（手作業）　→　手順3：集計・納品</p>
+      </div>
+
+      <h3 id="m-step1"><span class="tag">手順 1</span>データを取得する</h3>
+      <ol class="steps">
+        <li><b>「①取得する.command」をダブルクリックします。</b><div class="note">Windows では「①取得する」（Windowsバッチファイル）。</div></li>
+        <li><b>処理の完了を待ちます（30分〜2時間程度）。</b><div class="note">自動的にブラウザが開きますが、操作や終了の操作は行わないでください。</div></li>
+        <li><b>「4媒体のデータ取得が終わりました」と表示されれば完了です。</b></li>
+      </ol>
+
+      <h3 id="m-step2"><span class="tag">手順 2</span>dodaチャレンジを取得する（手作業）</h3>
+      <p>dodaチャレンジは自動取得に対応していないため、ページの内容を手作業で取得します。</p>
+      <ol class="steps">
+        <li><b>Chrome で dodaチャレンジの求人検索結果ページを開きます。</b><div class="note"><a href="https://doda.jp/challenge/" target="_blank" rel="noopener">https://doda.jp/challenge/</a> から求人を検索します。</div></li>
+        <li><b>「もっと見る」ボタンを、表示されなくなるまで押します。</b>
+          <div class="note">すべての求人を1ページに表示させるための操作です。途中で中断すると取得件数が大きく減少しますので、最後まで押し切ってください。</div></li>
+        <li><b>求人一覧の上で右クリックし、「検証」を選択します。</b><div class="note">画面横に開発者ツールが表示されます。</div></li>
+        <li><b>求人一覧全体を囲む要素を選択し、右クリック → Copy → Copy outerHTML を選択します。</b>
+          <div class="note">開発者ツール上の各行にマウスを合わせると、ページ側の対応箇所がハイライトされます。求人一覧全体がハイライトされる要素を選択してください。</div></li>
+        <li><b>「dodaここに貼る.txt」を開き、既存の内容を削除してから貼り付け、保存します。</b></li>
+      </ol>
+      <div class="box imp-b">
+        <div class="t">重要</div>
+        <p>「もっと見る」を最後まで押していない場合、一部の求人のみが取得され、件数が大きく減少します。取得件数の目安は1,800件前後です。著しく少ない場合は、押し残しの可能性をご確認ください。</p>
+      </div>
+      <details>
+        <summary>補足：「もっと見る」の操作を自動化する場合（任意）</summary>
+        <p>ボタンの押下回数が多い場合、ページを開いた状態で <span class="kbd">F12</span> を押して「Console」タブを開き、以下を貼り付けて <span class="kbd">Enter</span> を押すと、最後まで自動的に展開されます。「完了」と表示されたら、上記の手順4へ進んでください。手作業による押下でも問題ありません。</p>
+        <pre><code>(async () =&gt; {
+  let clicks = 0, idle = 0;
+  while (idle &lt; 3) {
+    const before = document.body.scrollHeight;
+    window.scrollTo(0, document.body.scrollHeight);
+    const btn = [...document.querySelectorAll('button, a, span, div')]
+      .find(el =&gt; el.offsetParent !== null &amp;&amp; el.textContent.trim() === 'もっと見る');
+    if (btn) { btn.click(); clicks++; }
+    await new Promise(r =&gt; setTimeout(r, 2000));
+    if (document.body.scrollHeight === before &amp;&amp; !btn) idle++; else idle = 0;
+  }
+  console.log(`完了: もっと見る ${clicks} 回クリック。全件展開済み`);
+})();</code></pre>
+      </details>
+
+      <h3 id="m-step3"><span class="tag">手順 3</span>集計して納品する</h3>
+      <ol class="steps">
+        <li><b>「②集計する.command」をダブルクリックします。</b><div class="note">数分で完了します。Windows では「②集計する」（Windowsバッチファイル）。</div></li>
+        <li><b>「7ファイルそろっています」と表示されれば完了です。</b></li>
+        <li><b>作成された「日付_集計」フォルダ（例：20260630_集計）を、フォルダごと Drive へアップロードします。</b></li>
+        <li><b>依頼元へ完了報告を行い、当月の作業は完了です。</b><div class="note">各媒体の件数サマリを添えると、確認が円滑になります。</div></li>
+      </ol>
+      <div class="box note-b">
+        <div class="t">「日付_集計」フォルダに含まれる7ファイル</div>
+        <p>atGP／LITALICO仕事ナビ／dodaチャレンジ／BABナビ／マイナビパートナーズ の各CSV（5件）、全媒体を統合した企業一覧（all_companies_deduped）、重複削除した企業の一覧（removed_duplicate_companies）。</p>
+      </div>
+      <details>
+        <summary>参考：件数の目安（前月との比較用）</summary>
+        <table>
+          <thead><tr><th>媒体</th><th>取得件数</th><th>重複削除後</th></tr></thead>
+          <tbody>
+            <tr><td>atGP</td><td>1,782</td><td>1,782</td></tr>
+            <tr><td>LITALICO仕事ナビ</td><td>2,584</td><td>2,051</td></tr>
+            <tr><td>dodaチャレンジ</td><td>1,813</td><td>1,058</td></tr>
+            <tr><td>BABナビ</td><td>1,221</td><td>1,068</td></tr>
+            <tr><td>マイナビパートナーズ</td><td>466</td><td>202</td></tr>
+            <tr><td><b>全媒体のユニーク企業数</b></td><td>—</td><td><b>2,231</b></td></tr>
+          </tbody>
+        </table>
+        <p style="color:var(--muted);font-size:13.5px">前月との差が±30%を超える場合は、媒体側の仕様変更の可能性があります。お問い合わせください。</p>
+      </details>
+      <div class="box warn-b">
+        <div class="t">注意</div>
+        <p>同一媒体の取得は1日1回までとしてください（取得先サイトへの負荷軽減のため）。</p>
+      </div>
+    </section>
+
+    <section id="trouble">
+      <h2><span class="no">5</span>トラブル対応</h2>
+      <p class="lead">処理が停止した場合は、まず同じファイルをもう一度実行してください。多くの場合はこれで解消します。解消しない場合は、下表をご確認のうえ、お問い合わせください。実行画面のスクリーンショットを添えていただくと、対応が円滑になります。</p>
+      <table>
+        <thead><tr><th style="width:42%">状況</th><th>対応</th></tr></thead>
+        <tbody>
+          <tr><td>処理中に自動でブラウザが開く</td><td>正常な動作です。操作せずにお待ちください。</td></tr>
+          <tr><td>処理がなかなか終わらない</td><td>月曜（リクナビ・HERP）は1時間以上を要します。画面を閉じずにお待ちください。</td></tr>
+          <tr><td>ファイルの中身が空、または1行のみ</td><td>もう一度実行してください。解消しない場合はお問い合わせください。</td></tr>
+          <tr><td>「準備がまだのようです」と表示される</td><td>先に「はじめにこれ」を実行してください（初期設定）。</td></tr>
+          <tr><td>（月次・手順2）「HTMLが貼られていないようです」</td><td>手順2の貼り付けを行ったうえで、手順3を再実行してください。</td></tr>
+          <tr><td>（月次・手順3）「ファイルが7個ありません」</td><td>画面の案内に従い、不足している媒体を手順1から再実行してください。</td></tr>
+          <tr><td>件数が前月から3割以上異なる</td><td>媒体側の仕様変更の可能性があります。お問い合わせください。</td></tr>
+          <tr><td>（Windows）ダブルクリックで実行できない</td><td>「初期設定」タブ内の「セキュリティの確認画面が表示され、実行できない場合」を参照してください。</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="faq">
+      <h2><span class="no">6</span>よくあるご質問</h2>
+      <details><summary>初期設定は毎回必要ですか。</summary><p>いいえ。フォルダを受領した初回のみです。翌日以降・翌月以降は不要です。</p></details>
+      <details><summary>土日に実行しても問題ありませんか。</summary><p>問題ありません。土日は処理対象がない旨が表示されるのみで、処理は行われません。</p></details>
+      <details><summary>実行中に他の作業をしても構いませんか。</summary><p>差し支えありません。ただし、自動的に開いたブラウザは操作しないでください。なお、処理中はスリープを避けることを推奨します。</p></details>
+      <details><summary>処理が途中で停止したようです。</summary><p>同じファイルをもう一度実行してください。多くの場合はこれで解消します。解消しない場合は、実行画面のスクリーンショットを添えてお問い合わせください。</p></details>
+      <details><summary>「プログラム本体」フォルダの中を確認しても構いませんか。</summary><p>閲覧は差し支えありませんが、内部ファイルの編集・移動・削除は行わないでください。動作不良の原因となります。</p></details>
+      <details><summary>ログイン情報（ID・パスワード）はどこにありますか。</summary><p>「プログラム本体」内の <code>credentials.yaml</code> ／ <code>config.yaml</code> という設定ファイルで管理しています。これらは外部に共有されません。変更が必要な場合は担当者へご相談ください。</p></details>
+    </section>
+
+    <section id="glossary">
+      <h2><span class="no">7</span>用語の説明</h2>
+      <table>
+        <thead><tr><th style="width:210px">用語</th><th>説明</th></tr></thead>
+        <tbody>
+          <tr><td>ターミナル／コマンドプロンプト</td><td>処理の進行状況が表示される画面です。実行中は閉じないでください。</td></tr>
+          <tr><td>媒体</td><td>求人サイトを指します（HRMOS、リクナビ、atGP など）。</td></tr>
+          <tr><td>CSV</td><td>表形式のデータファイルです。Excel で開くことができ、納品の対象となります。</td></tr>
+          <tr><td>スクレイピング</td><td>サイトから情報を自動的に取得することです。本ツールが自動で行います。</td></tr>
+          <tr><td>検証／開発者ツール</td><td>ブラウザでページの構造を確認する機能です。dodaチャレンジの手作業時に使用します。</td></tr>
+          <tr><td>Drive</td><td>Google ドライブを指します。作成したファイルの納品先です。</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section id="contact">
+      <h2><span class="no">8</span>お問い合わせ</h2>
+      <p>不明点や解消しない事象がある場合は、お問い合わせください。実行画面のスクリーンショットを添えていただくと、確認が円滑になります。</p>
+      <div class="box note-b">
+        <div class="t">担当：内山</div>
+        <p>技術的な詳細資料は、各「プログラム本体」フォルダ内の <code>定期実行_引き継ぎ.md</code> ／ <code>月次集計_手順書.md</code> に記載しています。</p>
+      </div>
+      <p class="foot">求人データ取得ツール 操作マニュアル</p>
+    </section>
+  </div>
+</div>
+
+<a href="#" class="totop" id="totop" aria-label="ページ上部へ">↑</a>
+
+<script>
+  document.querySelectorAll('.tab-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var id = btn.getAttribute('data-tab');
+      document.querySelectorAll('.tab-btn').forEach(function(b){ b.classList.toggle('active', b===btn); });
+      document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.toggle('active', p.id===id); });
+    });
+  });
+  var links = Array.prototype.slice.call(document.querySelectorAll('.toc a'));
+  var map = {};
+  links.forEach(function(a){ var t=document.querySelector(a.getAttribute('href')); if(t) map[a.getAttribute('href')]=t; });
+  var sections = Object.keys(map);
+  function onScroll(){
+    var pos = window.scrollY + 120, current = null;
+    sections.forEach(function(h){ if(map[h].offsetTop <= pos) current = h; });
+    links.forEach(function(a){ a.classList.toggle('active', a.getAttribute('href')===current); });
+    document.getElementById('totop').classList.toggle('show', window.scrollY > 500);
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+</script>
+</body>
+</html>

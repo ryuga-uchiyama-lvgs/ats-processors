@@ -41,8 +41,11 @@ if errorlevel 1 goto fail
 if errorlevel 1 goto fail
 
 echo [3/3] 自動操作用のブラウザをインストールしています(いちばん時間がかかります)...
+rem 社内ネットワーク(プロキシ/自己署名証明書)でダウンロードが弾かれる対策
+set NODE_TLS_REJECT_UNAUTHORIZED=0
 "プログラム本体\venv\Scripts\python.exe" -m playwright install chromium
 if errorlevel 1 goto fail
+set NODE_TLS_REJECT_UNAUTHORIZED=
 
 echo.
 echo ==================================================
