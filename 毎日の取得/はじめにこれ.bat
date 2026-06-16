@@ -3,7 +3,7 @@ chcp 65001 >nul
 rem ============================================================
 rem 最初に1回だけダブルクリックするファイル(Windows用)
 rem 必要なプログラムを自動でインストールします
-rem (Pythonが未インストールの場合も自動でインストールします)
+rem (実行環境を作る道具 uv も、無ければ自動でインストールします)
 rem ============================================================
 cd /d "%~dp0"
 set PYTHONUTF8=1
@@ -14,33 +14,31 @@ echo  終わるまでこのウィンドウは閉じないでください
 echo ==================================================
 echo.
 
-rem --- Pythonを探す(なければ自動インストール) ---
-call :findpython
-if defined PY_BOOT goto pyready
+rem --- uv(実行環境を作る道具)を探す。よくある場所もPATHに足す ---
+set "PATH=%USERPROFILE%\.local\bin;%USERPROFILE%\.cargo\bin;%PATH%"
 
-echo [0/4] Pythonが見つからないため、自動インストールします(数分かかります)...
-set "PYINST=%TEMP%\python-installer.exe"
-curl -L -s -o "%PYINST%" https://www.python.org/ftp/python/3.12.8/python-3.12.8-amd64.exe
-if errorlevel 1 goto nopython
-"%PYINST%" /quiet InstallAllUsers=0 PrependPath=1 Include_launcher=1
-if errorlevel 1 goto nopython
-del /f /q "%PYINST%" >nul 2>&1
-call :findpython
-if not defined PY_BOOT goto nopython
-echo       Pythonのインストールが完了しました。続けます...
+where uv >nul 2>&1
+if not errorlevel 1 goto uvready
 
-:pyready
-echo [1/4] 実行環境を作成しています...
-%PY_BOOT% -m venv --clear "プログラム本体\venv"
+echo [1/4] 実行環境を作る道具(uv)をインストールしています(数分かかります)...
+powershell -ExecutionPolicy Bypass -NoProfile -Command "irm https://astral.sh/uv/install.ps1 | iex"
+if errorlevel 1 goto nouv
+set "PATH=%USERPROFILE%\.local\bin;%USERPROFILE%\.cargo\bin;%PATH%"
+where uv >nul 2>&1
+if errorlevel 1 goto nouv
+echo       uvのインストールが完了しました。続けます...
+
+:uvready
+echo [2/4] 実行環境を作成しています...
+rem Python本体もuvが用意するので、パソコン側のPythonは不要です。
+uv venv --clear --python 3.12 "プログラム本体\venv"
 if errorlevel 1 goto fail
 
-echo [2/4] 必要なプログラムを取得しています(いちばん時間がかかります)...
-"プログラム本体\venv\Scripts\python.exe" -m pip install --quiet --upgrade pip
-if errorlevel 1 goto fail
-"プログラム本体\venv\Scripts\python.exe" -m pip install --quiet pandas pyyaml selenium webdriver-manager playwright
+echo [3/4] 必要なプログラムを取得しています(いちばん時間がかかります)...
+uv pip install --python "プログラム本体\venv\Scripts\python.exe" pandas pyyaml selenium webdriver-manager playwright
 if errorlevel 1 goto fail
 
-echo [3/4] 自動操作用のブラウザをインストールしています...
+echo [4/4] 自動操作用のブラウザをインストールしています...
 rem 社内ネットワーク(プロキシ/自己署名証明書)でダウンロードが弾かれる対策
 set NODE_TLS_REJECT_UNAUTHORIZED=0
 set PLAYWRIGHT_DOWNLOAD_HOST=
@@ -48,7 +46,7 @@ set PLAYWRIGHT_DOWNLOAD_HOST=
 if errorlevel 1 goto fail
 set NODE_TLS_REJECT_UNAUTHORIZED=
 
-echo [4/4] 保存先フォルダを設定しています...
+echo 保存先フォルダを設定しています...
 rem Macで作った「ショートカット」はWindowsでは動かないため、ここで作り直す
 if not exist "プログラム本体\herp\output_herp_jobs\" mkdir "プログラム本体\herp\output_herp_jobs"
 if exist "プログラム本体\output" if not exist "プログラム本体\output\" del /f /q "プログラム本体\output"
@@ -67,28 +65,13 @@ echo.
 pause
 exit /b 0
 
-:findpython
-rem Pythonを探してPY_BOOTに設定する(py → python → インストール先フォルダの順)
-set "PY_BOOT="
-py -3 --version >nul 2>&1
-if not errorlevel 1 (
-  set "PY_BOOT=py -3"
-  exit /b 0
-)
-python --version >nul 2>&1
-if not errorlevel 1 (
-  set "PY_BOOT=python"
-  exit /b 0
-)
-for /d %%d in ("%LocalAppData%\Programs\Python\Python3*") do if exist "%%d\python.exe" set "PY_BOOT="%%d\python.exe""
-exit /b 0
-
-:nopython
+:nouv
 echo.
-echo Pythonの自動インストールができませんでした。
-echo 一番上のフォルダにある「Windowsで使うとき.md」の
-echo 「初回の準備」に沿って手動でインストールしてから、
-echo もう一度このファイルをダブルクリックしてください。
+echo 実行環境を作る道具(uv)のインストールができませんでした。
+echo インターネット接続を確認して、もう一度このファイルを
+echo ダブルクリックしてください。
+echo 解消しない場合は、この画面のスクリーンショットを撮って
+echo 内山までお送りください。
 echo.
 pause
 exit /b 1

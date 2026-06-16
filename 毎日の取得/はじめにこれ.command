@@ -18,23 +18,26 @@ fail() {
   exit 1
 }
 
-# Pythonの確認(なければmacOSがインストール画面を出すので「インストール」を押してもらう)
-if ! python3 --version >/dev/null 2>&1; then
-  echo "実行に必要な開発ツールがインストールされていません。"
-  echo "画面に「インストール」ボタンが出たら押して、終わったら"
-  echo "もう一度このファイルをダブルクリックしてください。"
-  xcode-select --install >/dev/null 2>&1
-  exit 0
+# uv(実行環境を作る道具)を探す。よくある場所も見る。
+export PATH="$HOME/.local/bin:$HOME/.cargo/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+# 見つからなければ自動でインストールする(数十秒)
+if ! command -v uv >/dev/null 2>&1; then
+  echo "[1/4] 実行環境を作る道具(uv)をインストールしています..."
+  curl -LsSf https://astral.sh/uv/install.sh | sh || fail
+  export PATH="$HOME/.local/bin:$HOME/.cargo/bin:$PATH"
 fi
+command -v uv >/dev/null 2>&1 || fail
 
-echo "[1/3] 実行環境を作成しています..."
-python3 -m venv --clear "プログラム本体/venv" || fail
+echo "[2/4] 実行環境を作成しています..."
+# Python本体もuvが用意するので、パソコン側のPythonは不要です。
+uv venv --clear --python 3.12 "プログラム本体/venv" || fail
 
-echo "[2/3] 必要なプログラムを取得しています(いちばん時間がかかります)..."
-"プログラム本体/venv/bin/pip" install --quiet --upgrade pip || fail
-"プログラム本体/venv/bin/pip" install --quiet pandas pyyaml selenium webdriver-manager playwright || fail
+echo "[3/4] 必要なプログラムを取得しています(いちばん時間がかかります)..."
+uv pip install --python "プログラム本体/venv/bin/python" \
+  pandas pyyaml selenium webdriver-manager playwright || fail
 
-echo "[3/3] 自動操作用のブラウザをインストールしています..."
+echo "[4/4] 自動操作用のブラウザをインストールしています..."
 "プログラム本体/venv/bin/python" -m playwright install chromium || fail
 
 echo ""
