@@ -55,9 +55,8 @@ cd 毎日の取得
 # Python 3.12 の仮想環境を作成（プログラム本体/venv に作られる）
 uv venv --clear --python 3.12 プログラム本体/venv
 
-# 依存パッケージをインストール
-uv pip install --python プログラム本体/venv/bin/python \
-  pandas pyyaml selenium webdriver-manager playwright
+# 依存パッケージをインストール（requirements.txt に追従）
+uv pip install --python プログラム本体/venv/bin/python -r プログラム本体/requirements.txt
 
 # 自動操作用ブラウザ（リクナビ・HERP で使用）を取得
 プログラム本体/venv/bin/python -m playwright install chromium
