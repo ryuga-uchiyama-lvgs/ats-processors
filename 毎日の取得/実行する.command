@@ -78,7 +78,7 @@ echo "=================================================="
 echo " 本日作成されたファイル(Driveへアップロードしてください):"
 echo "=================================================="
 D1=$(date +%Y-%m-%d); D2=$(date +%Y%m%d)
-FOUND=$(find -L output -type f \( -name "*${D1}*" -o -name "*${D2}*" \) 2>/dev/null)
+FOUND=$(find -L "$APP/output" "$APP/herp/output_herp_jobs" -type f \( -name "*${D1}*" -o -name "*${D2}*" \) 2>/dev/null)
 if [ -n "$FOUND" ]; then
   echo "$FOUND" | sed 's/^/  ✅ /'
 else
