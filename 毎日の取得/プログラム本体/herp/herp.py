@@ -466,7 +466,9 @@ def scrape_herp(categories=None):
             context = browser.new_context()
             page = context.new_page()
 
-            email, password = creds.get(CATEGORY_ALIAS.get(category, category), (None, None))
+            # creds のキーは両ローダーとも正規名（IN など）。旧列名 IN/DS はフォールバックで見る
+            # （2026/9/7: ここが IN/DS 固定だったため config.yaml 移行後に IN だけ未ログイン→0件になった）
+            email, password = creds.get(category) or creds.get(CATEGORY_ALIAS.get(category, category), (None, None))
             if email:
                 # ⚠️ ログインの起点にカテゴリ1社目の招待URLを使ってはいけない。
                 #    そのURLが別アカウント宛だとHERPが強制ログアウトし、
@@ -497,7 +499,7 @@ def scrape_herp(categories=None):
                 else:
                     print(f"\n⚠ {category}: 未ログインのまま続行します")
             else:
-                print(f"\n⚠ {category}: password.txtに認証情報が無いため未ログインで続行します")
+                print(f"\n⚠ {category}: config.yaml / password.txt に認証情報が無いため未ログインで続行します（2026/8/5 以降は0件になります）")
 
             for company, base_url in entries:
                 print(f"\n▶ カテゴリ: {category} - {company} ({base_url})")
