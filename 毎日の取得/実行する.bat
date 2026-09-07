@@ -37,7 +37,12 @@ goto weekend
 call :run "HRMOS" "プログラム本体" ats.py --media hrmos
 call :ensure_browser
 call :run "リクナビ" "プログラム本体" rikunabi.py
-call :run "HERP" "プログラム本体\herp" herp.py
+call :check_herp_ready
+if errorlevel 1 (
+  set "ERRORS=%ERRORS% HERP"
+) else (
+  call :run "HERP" "プログラム本体\herp" herp.py
+)
 goto summary
 
 :tue_thu
@@ -84,6 +89,15 @@ echo 準備がまだのようです。先に「はじめにこれ」(Windowsバ�
 echo (実施済みの場合は、この画面のスクリーンショットを内山までお送りください)
 echo.
 pause
+exit /b 1
+
+:check_herp_ready
+rem HERPはログインが必要(2026/8/5〜)。ID/PASSはHRMOS等と同じ config.yaml を読む(2026/9/4〜)
+if exist "プログラム本体\config.yaml" exit /b 0
+echo.
+echo [!] HERPをスキップします: プログラム本体\config.yaml が見つかりません
+echo    HERPはログインが必要なため、このファイルが無いと取得できません。(HRMOS等と同じファイルです)
+echo    config.yaml を配置してから、もう一度実行してください。(入手方法は内山まで)
 exit /b 1
 
 :ensure_browser

@@ -22,7 +22,8 @@ echo   2) Talentio
 echo   3) JobCan
 echo   4) リクナビ（全カテゴリ）
 echo   5) リクナビ（カテゴリを指定）
-echo   6) HERP
+echo   6) HERP（全カテゴリ・約2時間）
+echo   7) HERP（カテゴリを指定・途中で止まったときの続きに）
 echo   q) やめる
 echo --------------------------------------------------
 set "choice="
@@ -33,11 +34,31 @@ if "%choice%"=="2" call :run "Talentio" "プログラム本体" ats.py --media t
 if "%choice%"=="3" call :run "JobCan" "プログラム本体" ats.py --media jobcan & goto summary
 if "%choice%"=="4" (call :ensure_browser & call :run "リクナビ（全カテゴリ）" "プログラム本体" rikunabi.py & goto summary)
 if "%choice%"=="5" goto rikunabi_cat
-if "%choice%"=="6" (call :ensure_browser & call :run "HERP" "プログラム本体\herp" herp.py & goto summary)
+if "%choice%"=="6" goto herp
+if "%choice%"=="7" goto herp_cat
 if /i "%choice%"=="q" echo 中止しました。& exit /b 0
-echo 1〜6 または q を入力してください。
+echo 1〜7 または q を入力してください。
 echo.
 goto menu
+
+:herp
+call :check_herp_ready
+if errorlevel 1 goto summary
+call :ensure_browser
+call :run "HERP" "プログラム本体\herp" herp.py
+goto summary
+
+:herp_cat
+call :check_herp_ready
+if errorlevel 1 goto summary
+echo.
+echo カテゴリ名を入力してください（例: CRG / CRS / IN / WEB / コンサル。複数はスペース区切り・2つまで）
+set "hcat="
+set /p "hcat=カテゴリ名: "
+if "%hcat%"=="" echo カテゴリ名が空のため中止しました。& exit /b 1
+call :ensure_browser
+call :run "HERP（%hcat%）" "プログラム本体\herp" herp.py %hcat%
+goto summary
 
 :rikunabi_cat
 echo.
@@ -66,6 +87,15 @@ echo 準備がまだのようです。先に「はじめにこれ」(Windowsバ�
 echo (実施済みの場合は、この画面のスクリーンショットを内山までお送りください)
 echo.
 pause
+exit /b 1
+
+:check_herp_ready
+rem HERPはログインが必要(2026/8/5〜)。ID/PASSはHRMOS等と同じ config.yaml を読む(2026/9/4〜)
+if exist "プログラム本体\config.yaml" exit /b 0
+echo.
+echo [!] HERPを実行できません: プログラム本体\config.yaml が見つかりません
+echo    HERPはログインが必要なため、このファイルが無いと取得できません。(HRMOS等と同じファイルです)
+echo    config.yaml を配置してから、もう一度実行してください。(入手方法は内山まで)
 exit /b 1
 
 :ensure_browser

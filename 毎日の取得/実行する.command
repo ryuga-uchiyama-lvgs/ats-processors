@@ -57,7 +57,17 @@ case "$DOW" in
     run "HRMOS"    "$APP"      "$PY" ats.py --media hrmos
     ensure_browser   # リクナビ・HERPはブラウザが必要なので事前に確認
     run "リクナビ" "$APP"      "$PY" rikunabi.py
-    run "HERP"     "$APP/herp" "$PY" herp.py
+    if [ -f "$APP/config.yaml" ]; then
+      # HERPはログインが必要(2026/8/5〜)。ID/PASSはHRMOS等と同じ config.yaml を読む(2026/9/4〜)。
+      # HERPはブラウザ画面を出さずに動く(見たいときは HERP_SHOW_BROWSER=1)。
+      run "HERP" "$APP/herp" "$PY" herp.py
+    else
+      echo ""
+      echo "⚠️  HERPをスキップします: プログラム本体/config.yaml が見つかりません"
+      echo "   HERPはログインが必要なため、このファイルが無いと取得できません。(HRMOS等と同じファイルです)"
+      echo "   config.yaml を配置してから、もう一度実行してください。(入手方法は内山まで)"
+      ERRORS="${ERRORS} HERP"
+    fi
     ;;
   2|4) # 火・木: HRMOS + Talentio
     run "HRMOS"    "$APP" "$PY" ats.py --media hrmos

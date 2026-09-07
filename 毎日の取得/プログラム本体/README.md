@@ -143,12 +143,18 @@ Herpエージェント向け求人サイトからデータを収集します。
 
 ```bash
 cd herp
-python herp.py
+python herp.py              # 全カテゴリ（約2時間）
+python herp.py CRG          # カテゴリ指定（複数可: python herp.py CRS WEB）
+HERP_SHOW_BROWSER=1 python herp.py CRG   # ブラウザ画面を出して実行（既定は非表示）
 ```
+
+#### ログイン（2026/8/5〜必須）
+
+ID/PASS は `../config.yaml` の `login.accounts`（HRMOS 等と共通）から読む。旧 `herp/password.txt` は残っていればフォールバックとして読む。
 
 #### URL設定
 
-`herp.py`内の`HERP_URLS`リストで管理：
+ログイン後の招待一覧（`/p/invitations`）から毎回取り直す。`herp.py`内の`HERP_URLS`リストは招待一覧が取れなかったときのフォールバック：
 
 ```python
 HERP_URLS = [
@@ -175,6 +181,10 @@ herp/output_herp_jobs/herp-CRS-20260318.csv
 #### 出力フォーマット
 
 Herpの求人詳細データ（カテゴリ、企業名、求人URL、職種、業務内容等）
+
+#### 検算
+
+カテゴリ単位で CSV を書いた直後に「0件 / 案件名が空 / 詳細列なし / 仕事概要の充足率50%未満」を検査し、1つでも該当すれば `🔴 検算NG` を表示して終了コード1で終わる。NG のカテゴリは納品せず、そのカテゴリだけ再実行する。
 
 ---
 

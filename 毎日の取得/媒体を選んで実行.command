@@ -46,7 +46,8 @@ echo "  2) Talentio"
 echo "  3) JobCan"
 echo "  4) リクナビ（全カテゴリ）"
 echo "  5) リクナビ（カテゴリを指定）"
-echo "  6) HERP"
+echo "  6) HERP（全カテゴリ・約2時間）"
+echo "  7) HERP（カテゴリを指定・途中で止まったときの続きに）"
 echo "  q) やめる"
 echo "--------------------------------------------------"
 read -r -p "番号: " choice
@@ -67,9 +68,32 @@ case "$choice" in
      ensure_browser
      run "リクナビ（${cat}）" "$APP" "$PY" rikunabi.py "$cat"
      ;;
-  6) ensure_browser; run "HERP" "$APP/herp" "$PY" herp.py ;;
+  6|7)
+     # HERPはログインが必要(2026/8/5〜)。ID/PASSはHRMOS等と同じ config.yaml を読む(2026/9/4〜)
+     if [ ! -f "$APP/config.yaml" ]; then
+       echo ""
+       echo "⚠️  HERPを実行できません: プログラム本体/config.yaml が見つかりません"
+       echo "   HERPはログインが必要なため、このファイルが無いと取得できません。(HRMOS等と同じファイルです)"
+       echo "   config.yaml を配置してから、もう一度実行してください。(入手方法は内山まで)"
+       exit 1
+     fi
+     ensure_browser
+     if [ "$choice" = "7" ]; then
+       echo ""
+       echo "カテゴリ名を入力してください（例: CRG / CRS / IN / WEB / コンサル。複数はスペース区切り）"
+       read -r -p "カテゴリ名: " hcat
+       if [ -z "$hcat" ]; then
+         echo "カテゴリ名が空のため中止しました。"
+         exit 1
+       fi
+       # shellcheck disable=SC2086
+       run "HERP（${hcat}）" "$APP/herp" "$PY" herp.py $hcat
+     else
+       run "HERP" "$APP/herp" "$PY" herp.py
+     fi
+     ;;
   q|Q) echo "中止しました。"; exit 0 ;;
-  *) echo "1〜6 または q を入力してください。"; exit 1 ;;
+  *) echo "1〜7 または q を入力してください。"; exit 1 ;;
 esac
 
 echo ""
