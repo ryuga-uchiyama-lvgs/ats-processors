@@ -43,13 +43,17 @@ def login_hrmos(email, password, login_url):
         raise
 
     return driver
-def login_talentio(email, password, login_url):
+def login_talentio(email, password, login_url, max_retries=3):
     from selenium import webdriver
     from selenium.webdriver.common.by import By
     from selenium.webdriver.chrome.service import Service
     from selenium.webdriver.support.ui import WebDriverWait
     from selenium.webdriver.support import expected_conditions as EC
+    from selenium.common.exceptions import (
+        ElementNotInteractableException, TimeoutException, StaleElementReferenceException,
+    )
     from webdriver_manager.chrome import ChromeDriverManager
+    import os, time, datetime
 
     options = webdriver.ChromeOptions()
     options.add_argument('--headless=new')  # デバッグ時OFF
@@ -59,20 +63,45 @@ def login_talentio(email, password, login_url):
     options.add_argument('--disable-software-rasterizer')
     options.add_argument('--disable-extensions')
     options.add_argument('--remote-debugging-port=0')
+    options.add_argument('--window-size=1280,900')
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
-    driver.get(login_url)
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.ID, "email")))
+    last_err = None
+    for attempt in range(1, max_retries + 1):
+        try:
+            driver.get(login_url)
+            wait = WebDriverWait(driver, 20)
+            # presence だけだと描画前に send_keys して element not interactable になるので
+            # 可視化・クリック可能まで待つ
+            email_el = wait.until(EC.visibility_of_element_located((By.ID, "email")))
+            pw_el = wait.until(EC.visibility_of_element_located((By.ID, "password")))
+            email_el.clear()
+            email_el.send_keys(email)
+            pw_el.clear()
+            pw_el.send_keys(password)
+            btn = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, "button[type='submit']")))
+            btn.click()
 
-    driver.find_element(By.ID, "email").send_keys(email)
-    driver.find_element(By.ID, "password").send_keys(password)
-    driver.find_element(By.CSS_SELECTOR, "button[type='submit']").click()
+            # ✅ ログイン直後に強制で求人一覧に移動
+            WebDriverWait(driver, 20).until(EC.url_contains("/candidate_activities"))
+            driver.get("https://agent.talentio.com/r/ats/requisitions?sort=updated_at&desc=true")
+            return driver
 
-    # ✅ ログイン直後に強制で求人一覧に移動
-    WebDriverWait(driver, 10).until(EC.url_contains("/candidate_activities"))
-    driver.get("https://agent.talentio.com/r/ats/requisitions?sort=updated_at&desc=true")
+        except (ElementNotInteractableException, TimeoutException, StaleElementReferenceException) as e:
+            last_err = e
+            os.makedirs("logs", exist_ok=True)
+            ts = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
+            shot = f"logs/talentio_login_fail_{ts}_try{attempt}.png"
+            try:
+                driver.save_screenshot(shot)
+            except Exception:
+                shot = "(スクショ保存失敗)"
+            print(f"⚠️ talentio ログイン試行 {attempt}/{max_retries} 失敗: {type(e).__name__}: "
+                  f"{str(e).splitlines()[0]} | url={driver.current_url} | screenshot={shot}")
+            time.sleep(3 * attempt)
 
-    return driver
+    driver.quit()
+    raise last_err
 
 def login_jobcan(email, password, login_url):
     from selenium import webdriver
