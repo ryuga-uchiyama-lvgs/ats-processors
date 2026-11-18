@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import InvalidSessionIdException, TimeoutException
 
 def crawl_site(driver, date_str, media_name, filename):
     results = []
@@ -19,6 +20,14 @@ def crawl_site(driver, date_str, media_name, filename):
             time.sleep(2)
 
             job_elements = driver.find_elements(By.CSS_SELECTOR, "a[href*='/jobs/'] span.normal")
+            if not job_elements:
+                try:
+                    WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.CSS_SELECTOR, "a[href*='/jobs/'] span.normal"))
+                    )
+                    job_elements = driver.find_elements(By.CSS_SELECTOR, "a[href*='/jobs/'] span.normal")
+                except TimeoutException:
+                    print(f"🔎 [hrmos] 求人0件: {company_name}")
             for job in job_elements:
                 job_title = job.text.strip()
                 parent = job.find_element(By.XPATH, "./ancestor::a[1]")
@@ -47,6 +56,8 @@ def crawl_site(driver, date_str, media_name, filename):
 
         except Exception as e:
             print(f"❌ {company_name} | エラー: {e}")
+            if isinstance(e, InvalidSessionIdException):
+                raise
             continue
 
     pd.DataFrame(results).to_csv(filename, index=False)

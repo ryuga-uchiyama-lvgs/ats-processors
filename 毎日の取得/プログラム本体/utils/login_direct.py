@@ -6,6 +6,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.keys import Keys
+from selenium.common.exceptions import TimeoutException
 import time
 
 def login_hrmos(email, password, login_url):
@@ -18,6 +19,13 @@ def login_hrmos(email, password, login_url):
     options.add_argument('--disable-extensions')
     options.add_argument('--remote-debugging-port=0')
     driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
+
+    # HRMOS rejects Chrome's HeadlessChrome user agent before the login form loads.
+    user_agent = driver.execute_script("return navigator.userAgent")
+    driver.execute_cdp_cmd(
+        "Network.setUserAgentOverride",
+        {"userAgent": user_agent.replace("HeadlessChrome/", "Chrome/")},
+    )
 
     driver.get(login_url)
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.NAME, "email")))
@@ -156,4 +164,3 @@ def login_jobcan(email, password, login_url):
         print("🛑 WebDriverエラー発生:", e)
         driver.quit()
         raise e
-    
